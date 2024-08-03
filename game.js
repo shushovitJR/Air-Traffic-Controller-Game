@@ -4,10 +4,6 @@ const ctx = canvas.getContext('2d');
 const CANVAS_WIDTH = canvas.width = 1100;
 const CANVAS_HEIGHT = canvas.height = 600;
 
-let timeToNextPlane = 0;
-let planeInterval = 500;
-let lasttime = 0;
-
 let planes = [];
 class Plane {
     constructor(){
@@ -34,17 +30,19 @@ class Plane {
                 this.speedY=0;
                 this.x+=this.speedX;
             }
-            if (this.x>=500){
+            if (this.x>=850){
                 this.speedX=0;
                 this.speedY=0;
-                this.x=500;
+                this.x=850;
             }
         }
             if (this.landing == 0 && this.takeoff == 1){
                 this.speedX = 3;
-                this.speedY = 2;
              this.y-=this.speedY;   
             this.x-=this.speedX;
+            if (this.x<=500){
+                this.speedY = 1;
+            }
         }
         if (this.x<-200 - this.width) this.markedForDeletion = true;
     }
@@ -69,17 +67,30 @@ class Plane {
         }
     }
     checkCollision(otherPlane) {
+        // Define the reduction amounts
+        const reductionWidth = 50;
+        const reductionHeight = 40;
+
+        // Adjusted dimensions for this plane
+        const thisAdjustedX = this.x + reductionWidth / 2;
+        const thisAdjustedY = this.y + reductionHeight / 2;
+        const thisAdjustedWidth = this.width - reductionWidth;
+        const thisAdjustedHeight = this.height - reductionHeight;
+
+        // Adjusted dimensions for the other plane
+        const otherAdjustedX = otherPlane.x + reductionWidth / 2;
+        const otherAdjustedY = otherPlane.y + reductionHeight / 2;
+        const otherAdjustedWidth = otherPlane.width - reductionWidth;
+        const otherAdjustedHeight = otherPlane.height - reductionHeight;
+
         return !(
-            this.x + this.width < otherPlane.x ||
-            this.x > otherPlane.x + otherPlane.width ||
-            this.y + this.height < otherPlane.y ||
-            this.y > otherPlane.y + otherPlane.height
+            thisAdjustedX + thisAdjustedWidth < otherAdjustedX ||
+            thisAdjustedX > otherAdjustedX + otherAdjustedWidth ||
+            thisAdjustedY + thisAdjustedHeight < otherAdjustedY ||
+            thisAdjustedY > otherAdjustedY + otherAdjustedHeight
         );
     }
 }
-
-
-
 
 
 class Cloud{
@@ -155,7 +166,7 @@ function setRandomInterval(){
     setTimeout(()=>{
         planes.push(new Plane());
         setRandomInterval();
-    },Math.random() * (10000 - 3000) + 3000);
+    },Math.random() * (6000 - 3000) + 3000);
 }
 function animate(){
     ctx.clearRect(0,0,CANVAS_WIDTH,CANVAS_HEIGHT);
@@ -180,7 +191,6 @@ function animate(){
             }
         };
     };
-    console.log(planes);
     requestAnimationFrame(animate);
 }
 setRandomInterval();
