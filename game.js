@@ -3,7 +3,6 @@ const canvas = document.getElementById('canvas1');
 const ctx = canvas.getContext('2d');
 const CANVAS_WIDTH = canvas.width = 1100;
 const CANVAS_HEIGHT = canvas.height = 600;
-
 let planes = [];
 class Plane {
     constructor(){
@@ -15,9 +14,11 @@ class Plane {
         this.speedY = 3;
         this.markedForDeletion = false;
         this.image = new Image();
-        this.image.src = './img/airplan.png';
+        this.image.src = './img/plane1.png';
         this.takeoff = false;
         this.landing = false;
+        this.angle = 0; 
+        this.flipY = 1;
     }
     update(){
         if (this.takeoff == 0 && this.landing == 0){
@@ -25,29 +26,42 @@ class Plane {
         }
         if (this.landing == 1 && this.takeoff == 0){
             this.y+=this.speedY;
+            this.x-=this.speedX;
+            this.angle = -45;
             if (this.y>=500){
                 this.y = 500;
                 this.speedY=0;
-                this.x+=this.speedX;
+                this.speedX = -3
+                this.angle = 180;
+                this.flipY = -1;
             }
             if (this.x>=850){
                 this.speedX=0;
                 this.speedY=0;
                 this.x=850;
+                this.angle = 0;
+                this.flipY = 1;
             }
         }
             if (this.landing == 0 && this.takeoff == 1){
                 this.speedX = 3;
+                this.flipY = 1;
              this.y-=this.speedY;   
             this.x-=this.speedX;
             if (this.x<=500){
                 this.speedY = 1;
+                this.angle = 20;
             }
         }
         if (this.x<-200 - this.width) this.markedForDeletion = true;
     }
     draw(){
-        ctx.drawImage(this.image,this.x,this.y,this.width,this.height);
+        ctx.save(); 
+        ctx.translate(this.x + this.width / 2, this.y + this.height / 2); 
+        ctx.rotate(this.angle*Math.PI/180);
+        ctx.scale(1,this.flipY);
+        ctx.drawImage(this.image,-this.width / 2, -this.height / 2, this.width, this.height);
+        ctx.restore(); 
     }
     isClicked(mouseX, mouseY) {
         return (
@@ -67,17 +81,14 @@ class Plane {
         }
     }
     checkCollision(otherPlane) {
-        // Define the reduction amounts
-        const reductionWidth = 50;
-        const reductionHeight = 40;
-
-        // Adjusted dimensions for this plane
+        const reductionWidth = 30;
+        const reductionHeight = 20;
+        
         const thisAdjustedX = this.x + reductionWidth / 2;
         const thisAdjustedY = this.y + reductionHeight / 2;
         const thisAdjustedWidth = this.width - reductionWidth;
         const thisAdjustedHeight = this.height - reductionHeight;
 
-        // Adjusted dimensions for the other plane
         const otherAdjustedX = otherPlane.x + reductionWidth / 2;
         const otherAdjustedY = otherPlane.y + reductionHeight / 2;
         const otherAdjustedWidth = otherPlane.width - reductionWidth;
